@@ -20,14 +20,16 @@ P_FnM <- .06 # both of them
 # hence: P_M = -(.12 - .06 - .17) = .11
 P_M <- -(P_F - P_FnM - P_FuM)
 P_M
+# [1] 0.11
 
 
 ## Q2
 qunif(.75)
+# [1] 0.75
 
 
 ## Q3
-# solution (I guess...): p / (1 - p) = Y / X
+# solution: p / (1 - p) = Y / X
 
 
 ## Q4
@@ -44,6 +46,7 @@ temp
 sum(temp["Prob", ] * temp["X", ])
 # short solution
 sum(x * p)
+# [1] 3
 
 
 ## Q6
@@ -54,3 +57,4 @@ P_pos_D = sens
 P_minus_Dc = spec
 PD = prev
 (P_pos_D * PD) / (P_pos_D * PD + (1 - P_minus_Dc) * (1 - PD))
+# [1] 0.4010695
