@@ -1,0 +1,83 @@
+---
+title: 'Coursera: Statistical Inference - Course Project'
+author: "Konstantin Greger"
+date: "2015/01/24"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Part 2: Analysis of the "ToothGrowth"" Data in the R "datasets"" Package
+
+```{r}
+# load the data
+library(datasets)
+tooth = ToothGrowth
+```
+
+The "ToothGrowth" data in the R "datasets" package consists of `r nrow(tooth)` observations. According to the [official description of the dataset](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/ToothGrowth.html) it provides "the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid)."
+
+Tooth length varies between `r min(tooth$len[tooth$supp == "OJ"])` and `r max(tooth$len[tooth$supp == "OJ"])` mm for the celivery using orange juice, and between `r min(tooth$len[tooth$supp == "VC"])` and `r max(tooth$len[tooth$supp == "VC"])` mm for the delivery using ascorbic acid.
+
+The following plot shows the data distribution over delivery methods and supplement doses:
+
+```{r}
+# plot the distributions
+library(ggplot2)
+ggplot(data = tooth, 
+       aes(x = as.factor(dose), 
+           y = len, 
+           fill = supp)) +
+    geom_bar(stat = "identity") +
+    facet_grid(. ~ supp) +
+    xlab("Supplement dose in mg") +
+    ylab("Tooth length in mm") +
+    guides(fill = guide_legend(title = "Supplement type"))
+```
+
+The data show a clear positive correlation between tooth length and the dose levels of Vitamin C for both delivery methods. The supplement dose appears to be of greater importance when the supplement is delivered as ascorbic acid as compared to orange juice.
+
+The null hypothesis $H_0$ is that the supplement type of vitamin C generally does not have an effect on the tooth length.
+
+```{r}
+# check for differences due to different supplement type
+# assumption: unequal variances between the two groups
+t.test(len ~ supp, 
+       data = tooth)
+```
+
+With a p-value of `r round(t.test(len ~ supp, data = tooth)$p.value, 2)` and a confidence interval containing zero we can not reject the null hypothesis $H_0$ that the different supplement types have no effect on tooth length.
+
+It is worthwhile to perform pairwise comparisons between the different supplement doses:
+
+```{r}
+# create subsets for the supplement dose level pairs
+tooth_0.5_1.0 <- subset(tooth, dose %in% c(0.5, 1.0)) 
+tooth_0.5_2.0 <- subset(tooth, dose %in% c(0.5, 2.0)) 
+tooth_1.0_2.0 <- subset(tooth, dose %in% c(1.0, 2.0)) 
+```
+
+```{r}
+# check for differences due to different dose levels: 0.5, 1.0
+# assumption: unequal variances between the two groups
+t.test(len ~ dose, 
+       data = tooth_0.5_1.0)
+```
+
+```{r}
+# check for differences due to different dose levels: 0.5, 2.0
+# assumption: unequal variances between the two groups
+t.test(len ~ dose, 
+       data = tooth_0.5_2.0)
+```
+
+```{r}
+# check for differences due to different dose levels: 1.0, 2.0
+# assumption: unequal variances between the two groups
+t.test(len ~ dose, 
+       data = tooth_1.0_2.0)
+```
+
+For all three dose level pairs (0.5 and 1.0 mg, 0.5 and 2.0 mg, 1.0 and 2.0 mg), the p-values are smaller than 0.05 (`r round(t.test(len ~ supp, data = tooth_0.5_1.0)$p.value, 2)`, `r round(t.test(len ~ supp, data = tooth_0.5_2.0)$p.value, 2)`, and `r round(t.test(len ~ supp, data = tooth_1.0_2.0)$p.value, 2)`, respectively), and none of the confidence intervals does contain zero. Therefire we can reject the null hypothesis $H_0$ and establish that increasing the dose level leads to an increase in tooth length.
+
+All analyses were performed under the assumption of a random assignment of guinea pigs to different dose level categories and supplement types, and also the representativeness of the samples.
